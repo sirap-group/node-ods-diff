@@ -25,6 +25,8 @@
     "ods"
   ],
   "dependencies": {
-    "xlsx": "^0.9.3"
+    "delete": "^0.3.2",
+    "unzip": "^0.1.11",
+    "xml2js": "^0.4.17"
   }
 }

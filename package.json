@@ -23,5 +23,8 @@
   "keywords": [
     "diff",
     "ods"
-  ]
+  ],
+  "dependencies": {
+    "xlsx": "^0.9.3"
+  }
 }

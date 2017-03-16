@@ -1,0 +1,27 @@
+{
+  "name": "ods-diff",
+  "description": "Highlight the diff between two LibreOffice spreadsheet",
+  "version": "0.1.0",
+  "homepage": "https://github.com/sirap-group/ods-diff",
+  "author": "Rémi Becheras (https://github.com/rbecheras)",
+  "repository": "rbecheras/ods-diff",
+  "bugs": {
+    "url": "https://github.com/rbecheras/ods-diff/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "LICENSE"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=4"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "diff",
+    "ods"
+  ]
+}

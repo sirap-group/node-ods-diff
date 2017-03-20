@@ -12,6 +12,12 @@ const archiver = require('archiver')
 const baseFilePath = './test/fixtures/sheet-origin.ods'
 const updatedFilePath = './test/fixtures/sheet-modified.ods'
 
+const CELL_STYLE_ADDED_LINE = 'odsdiff_addedline'
+const CELL_STYLE_ADDED_LINE_COLOR = '#00ff66'
+
+const CELL_STYLE_REMOVED_LINE = 'odsdiff_removedline'
+const CELL_STYLE_REMOVED_LINE_COLOR = '#ff9999'
+
 odsDiff(baseFilePath, updatedFilePath)
 
 module.exports = odsDiff
@@ -27,6 +33,10 @@ function odsDiff (baseFilePath, updatedFilePath) {
   const baseExtractedDir = path.join(baseFilePathParsed.dir, baseFilePathParsed.name.concat('_files'))
   const updatedExtractedDir = path.join(updatedFilePathParsed.dir, updatedFilePathParsed.name.concat('_files'))
   const outputExtractedDir = outputFilePath.concat('_files')
+  //
+  // const intermediateOriginCSV = path.join(baseFilePathParsed.dir, baseFilePathParsed.name.concat('.csv'))
+  // const intermediateUpdatedCSV = path.join(updatedFilePathParsed.dir, updatedFilePathParsed.name.concat('.csv'))
+  // const intermediateDiffCSV = path.join(outputFilePathParsed.dir, outputFilePathParsed.name.concat('.csv'))
 
   const baseXmlFilePath = path.join(baseExtractedDir, 'content.xml')
   const updatedXmlFilePath = path.join(updatedExtractedDir, 'content.xml')
@@ -40,7 +50,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
   console.log('> output file path:    ' + path.resolve(outputFilePath))
   console.log(chalk.blue('---\n'))
 
-  // unzip the ods files to handle their XML content
+  // Clean dir and unzip ods files to handle their XML content
   Promise.all([
     del.promise([baseExtractedDir])
     .then(() => extractFile(baseFilePath, baseExtractedDir)),
@@ -51,14 +61,14 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // prepare the source files directory output
   .then(() => {
-    console.log(chalk.blue('Create a working directory for the output source files, a copy of the updated ods extraction folder: ') + outputExtractedDir)
+    console.log(chalk.blue('Create a working directory for the output source files, a copy of the updated ods extraction folder:\n') + '  ' + outputExtractedDir)
     return new Promise((resolve, reject) => {
       copydir(updatedExtractedDir, outputExtractedDir, (err) => {
         if (err) {
           reject(err)
           return
         }
-        console.log(chalk.green('Output source folder created: ' + outputExtractedDir))
+        console.log('> ' + chalk.green('Output source folder created: ' + outputExtractedDir))
         resolve()
       })
     })
@@ -88,7 +98,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // Build the resulting .ods file
   .then(() => {
-    console.log(chalk.blue('\nBuild the ods file from the intermediate working folder: ') + outputExtractedDir + ' => ' + outputFilePath + '...')
+    console.log(chalk.blue('\nBuild the ods file from the intermediate working folder: \n  > ') + outputExtractedDir + chalk.blue(' => ') + outputFilePath + chalk.blue('...'))
     return new Promise((resolve, reject) => {
       let outputOds = fs.createWriteStream(outputFilePath)
       let archive = archiver('zip')
@@ -110,15 +120,18 @@ function odsDiff (baseFilePath, updatedFilePath) {
   })
 
   // clear the intermediate files
-  .then(() => Promise.all([
-    del.promise([baseExtractedDir]),
-    del.promise([updatedExtractedDir]),
-    del.promise([outputExtractedDir])
-  ]))
+  // .then(() => Promise.all([
+  //   del.promise([baseExtractedDir]),
+  //   del.promise([updatedExtractedDir]),
+  //   del.promise([outputExtractedDir])
+  // ]))
 
   // Log script results
-  .then(() => console.log('DONE.'))
-  .catch((err) => { console.error(err) })
+  .then(() => console.log(chalk.green('DONE.')))
+  .catch((err) => {
+    console.error(chalk.red(err))
+    console.error(err.stack)
+  })
 }
 
 function extractFile (input, output) {
@@ -139,40 +152,117 @@ function extractFile (input, output) {
 }
 
 function compareContentFiles (originPath, updatedPath) {
-  let oringinOdsSheets, updatedOdsSheets, updatedOds
+  let originOdsSheets, updatedOdsSheets, updatedOds
 
-  return parseFile(originPath).then((ods) => oringinOdsSheets = getOdsSheets(ods))
+  return parseFile(originPath).then((ods) => originOdsSheets = getDocumentSheets(ods))
   .then(() => parseFile(updatedPath)).then((ods) => {
     updatedOds = ods
-    updatedOdsSheets = getOdsSheets(ods)
+    updatedOdsSheets = getDocumentSheets(ods)
     setDiffStyles(ods)
   })
   .then(() => {
-    console.dir({oringinOdsSheets}, {depth: 3, colors: true})
-    console.dir({updatedOdsSheets}, {depth: 3, colors: true})
+    if (originOdsSheets.length !== updatedOdsSheets.length) {
+      throw new Error('ERROR: The two ods files has not the same number of sheets.')
+    } else {
+      console.log(chalk.blue('\nNumber of sheet to compare : ') + originOdsSheets.length + '\n')
+    }
   })
   .then(() => {
-    oringinOdsSheets.forEach((originOdsSheet) => {
-      updatedOdsSheets.forEach((updatedOdsSheet) => {
-
-      })
-    })
-    // ['table:table-row'][0]['table:table-cell'][0]['text:p'][0] // @TODO continuer : découper en 'rows' puis en 'cells'
-    // console.dir({sheets}, {depth: 3, colors: true})
+    // console.dir({originOdsSheets}, {depth: 7, colors: true})
+    // console.dir({updatedOdsSheets}, {depth: 7, colors: true})
   })
-  .then(() => updatedOds)
+
+  // Convert the two docs to csv
+  .then(() => {
+    // orinal csv
+    convertOdsSheetsToCsvFiles(originOdsSheets, originPath)
+
+    // updated csv
+    convertOdsSheetsToCsvFiles(updatedOdsSheets, updatedPath)
+  })
+  .thenResolve(updatedOds)
 }
 
-function getOdsSheets (ods) {
+function convertOdsSheetsToCsvFiles (sheets, basePath) {
+  sheets.forEach((sheet, sheetIndex) => {
+    let filePath = basePath.concat('_sheet#', sheetIndex, '.csv')
+    let ws = fs.createWriteStream(filePath)
+    console.log(chalk.blue('Writing CSV file: ') + filePath)
+    getSheetRows(sheet).forEach((row) => {
+      if (row) {
+        getRowCells(row).forEach((cell) => ws.write(getCellContent(cell) + ';'))
+      }
+      ws.write('\n')
+    })
+    ws.write('')
+    console.log(chalk.green('CSV file written :') + filePath)
+  })
+}
+
+function getDocumentSheets (ods) {
   let body = ods['office:document-content']['office:body'][0]
   let sheets = body['office:spreadsheet'][0]['table:table']
   return sheets
 }
 
+function getSheetRows (sheet) {
+  return sheet['table:table-row']
+}
+
+function getRowCells (row) {
+  return row['table:table-cell']
+}
+
+function getCellContent (cell) {
+  let content = (cell) ? cell['text:p'] || '' : ''
+  return String(content)
+}
+
+function compareRows (row1, row2) {
+  let cells1 = getRowCells(row1)
+  let cells2 = getRowCells(row2)
+}
+
+function setAddedStyleToRow (row) {
+  let cells = getRowCells(row)
+  cells.forEach((cell, cellIndex) => {
+    if (!cell) {
+      cells[cellIndex] = createEmptyCell()
+      cell = cells[cellIndex]
+    }
+    setAddedStyle(cell)
+  })
+}
+
+function setRemovedStyleToRow (row) {
+  row['table:table-cell'].forEach((cell, cellIndex) => {
+    if (!cell) {
+      row['table:table-cell'][cellIndex] = createEmptyCell()
+      cell = row['table:table-cell'][cellIndex]
+    }
+    setRemovedStyle(cell)
+  })
+}
+
+function setAddedStyle (cell) {
+  cell.$['table:style-name'] = CELL_STYLE_ADDED_LINE
+}
+
+function setRemovedStyle (cell) {
+  cell.$['table:style-name'] = CELL_STYLE_REMOVED_LINE
+}
+
+function createEmptyCell () {
+  return {
+    $: {},
+    'text:p': [' ']
+  }
+}
+
 function setDiffStyles (ods) {
   let styles = ods['office:document-content']['office:automatic-styles'][0]
-  let addedLineStyle = createCellStyleBgColor('odsdiff_newline', '#00ff66')
-  let removedLineStyle = createCellStyleBgColor('odsdiff_removedline', '#ff9999')
+  let addedLineStyle = createCellStyleBgColor(CELL_STYLE_ADDED_LINE, CELL_STYLE_ADDED_LINE_COLOR)
+  let removedLineStyle = createCellStyleBgColor(CELL_STYLE_REMOVED_LINE, CELL_STYLE_REMOVED_LINE_COLOR)
 
   styles['style:style'].push(addedLineStyle)
   styles['style:style'].push(removedLineStyle)

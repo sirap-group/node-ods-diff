@@ -7,10 +7,6 @@ const chalk = require('chalk')
 const pkg = require('../package.json')
 const odsdiff = require('../index')
 
-// const baseFilePath = './test/fixtures/sheet-origin.ods'
-// const updatedFilePath = './test/fixtures/sheet-modified.ods'
-// odsDiff(baseFilePath, updatedFilePath)
-
 cli
 .version(pkg.version)
 .option('-o, --f1 <path>', 'path of the original file to diff from')

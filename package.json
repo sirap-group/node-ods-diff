@@ -19,8 +19,8 @@
   },
   "bin": "bin/cli.js",
   "scripts": {
-    "test": "mocha",
-    "start": "node index.js"
+    "test": "bash test/test.sh",
+    "demo": "node bin/cli.js --f1 ./test/fixtures/simple/sheet-origin.ods --f2 ./test/fixtures/simple/sheet-modified.ods"
   },
   "keywords": [
     "diff",

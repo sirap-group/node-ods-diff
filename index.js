@@ -125,7 +125,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
         }
       })
     })
-    console.log(chalk.greeen('Diff changes successfuly applied to the XML content.'))
+    console.log(chalk.green('Diff changes successfuly applied to the XML content.'))
 
     return originOds
   })

@@ -234,8 +234,8 @@ function compareContentFiles (originPath, updatedPath) {
       originOdsSheets.map((sheet, sheetIndex) => {
         let csv1 = ''
         let csv2 = ''
-        let csv1Path = path.join(__dirname, getCSVPath(originPath, sheetIndex))
-        let csv2Path = path.join(__dirname, getCSVPath(updatedPath, sheetIndex))
+        let csv1Path = getCSVPath(originPath, sheetIndex)
+        let csv2Path = getCSVPath(updatedPath, sheetIndex)
         return Promise.all([
           new Promise((resolve, reject) => {
             let rs = fs.createReadStream(csv1Path, 'utf8')

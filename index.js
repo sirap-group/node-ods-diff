@@ -173,11 +173,11 @@ function odsDiff (baseFilePath, updatedFilePath) {
   })
 
   // clear the intermediate files
-  // .then(() => Promise.all([
-  //   del.promise([baseExtractedDir]),
-  //   del.promise([updatedExtractedDir]),
-  //   del.promise([outputExtractedDir])
-  // ]))
+  .then(() => Promise.all([
+    del.promise([baseExtractedDir]),
+    del.promise([updatedExtractedDir]),
+    del.promise([outputExtractedDir])
+  ]))
 
   // Log script results
   .then(() => console.log(chalk.green('DONE.')))

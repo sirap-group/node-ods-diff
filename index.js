@@ -31,15 +31,10 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   const outputFileName = baseFilePathParsed.name.concat('__diff__', updatedFilePathParsed.name, baseFilePathParsed.ext)
   const outputFilePath = path.join(baseFilePathParsed.dir, outputFileName)
-  const outputFilePathParsed = path.parse(outputFilePath)
 
   const baseExtractedDir = path.join(baseFilePathParsed.dir, baseFilePathParsed.name.concat('_files'))
   const updatedExtractedDir = path.join(updatedFilePathParsed.dir, updatedFilePathParsed.name.concat('_files'))
   const outputExtractedDir = outputFilePath.concat('_files')
-  //
-  // const intermediateOriginCSV = path.join(baseFilePathParsed.dir, baseFilePathParsed.name.concat('.csv'))
-  // const intermediateUpdatedCSV = path.join(updatedFilePathParsed.dir, updatedFilePathParsed.name.concat('.csv'))
-  // const intermediateDiffCSV = path.join(outputFilePathParsed.dir, outputFilePathParsed.name.concat('.csv'))
 
   const baseXmlFilePath = path.join(baseExtractedDir, 'content.xml')
   const updatedXmlFilePath = path.join(updatedExtractedDir, 'content.xml')
@@ -83,17 +78,12 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // apply the changes for each sheet
   .then(({originOds, sheetsChanges}) => {
+    console.log(chalk.blue('Applying diff changes to the XML content...'))
     getDocumentSheets(originOds).forEach(sheet => {
       let changes = sheetsChanges[getSheetName(sheet)]
       let rows = getSheetRows(sheet)
       let sheetCursor = 0
       let columnCount = getSheetColumnCount(sheet)
-      // let rowsToInsertAfter = []
-
-      console.log(chalk.red('---'))
-      console.dir({rows}, {colors: true, depth: 2})
-      console.dir({changes}, {colors: true, depth: 2})
-      console.log(chalk.red('---'))
 
       changes.forEach(change => {
         // no change
@@ -110,8 +100,6 @@ function odsDiff (baseFilePath, updatedFilePath) {
             let row = rows[cursor]
             setRemovedStyleToRow(row)
           }
-          // let cells = getRowCells(row)
-          // cells.forEach(cell => setRemovedStyle(cell))
           sheetCursor += change.count
           return
         }
@@ -120,18 +108,13 @@ function odsDiff (baseFilePath, updatedFilePath) {
         if (change.added) {
           let addindRowsContent = change.value.split('\n')
           let addindRows = addindRowsContent.map(content => createAddedRow(content, columnCount))
-          let cursorStart = sheetCursor
-          let cursorEnd = sheetCursor + change.count
 
           // fix the number of rows to insert
           let overlyRowsCount = addindRows.length - change.count
-          console.dir({addindRowsContent, addindRows}, {colors: true, depth: 5})
-          console.log(chalk.red('>>> overlyRowsCount: ' + overlyRowsCount))
           if (overlyRowsCount) {
             addindRows.splice(addindRows.length - overlyRowsCount, overlyRowsCount)
             addindRowsContent.splice(addindRowsContent.length - overlyRowsCount, overlyRowsCount)
           }
-          console.dir({addindRowsContent, addindRows}, {colors: true, depth: 5})
 
           addindRows.forEach(row => {
             rows.splice(sheetCursor, 0, row)
@@ -142,13 +125,13 @@ function odsDiff (baseFilePath, updatedFilePath) {
         }
       })
     })
+    console.log(chalk.greeen('Diff changes successfuly applied to the XML content.'))
 
     return originOds
   })
 
   // Write the output XML
   .then((originOds) => {
-    // console.dir({'originOds row': getDocumentSheets(originOds)}, {colors: true, depth: 5})
     let builder = new xml2js.Builder()
     let xml = builder.buildObject(originOds)
     return new Promise((resolve, reject) => {
@@ -224,7 +207,8 @@ function extractFile (input, output) {
 function compareContentFiles (originPath, updatedPath) {
   let originOdsSheets, updatedOdsSheets, originOds
 
-  return parseFile(originPath).then(ods => {
+  return parseFile(originPath)
+  .then(ods => {
     originOds = ods
     setDiffStyles(ods)
     originOdsSheets = getDocumentSheets(ods)
@@ -236,10 +220,6 @@ function compareContentFiles (originPath, updatedPath) {
     } else {
       console.log(chalk.blue('\nNumber of sheet to compare : ') + originOdsSheets.length + '\n')
     }
-  })
-  .then(() => {
-    // console.dir({originOdsSheets}, {depth: 7, colors: true})
-    // console.dir({updatedOdsSheets}, {depth: 7, colors: true})
   })
 
   // Convert the two docs to csv
@@ -323,7 +303,6 @@ function getSheetName (sheet) {
 }
 
 function getSheetColumnCount (sheet) {
-  // console.dir(sheet, {colors: true, depth: 3})
   return sheet['table:table-column'][0].$['table:number-columns-repeated']
 }
 
@@ -338,22 +317,6 @@ function getRowCells (row) {
 function getCellContent (cell) {
   let content = (cell) ? cell['text:p'] || '' : ''
   return String(content)
-}
-
-function compareRows (row1, row2) {
-  let cells1 = getRowCells(row1)
-  let cells2 = getRowCells(row2)
-}
-
-function setAddedStyleToRow (row) {
-  let cells = getRowCells(row)
-  cells.forEach((cell, cellIndex) => {
-    if (!cell) {
-      cells[cellIndex] = createEmptyCell()
-      cell = cells[cellIndex]
-    }
-    setAddedStyle(cell)
-  })
 }
 
 function setRemovedStyleToRow (row) {
@@ -396,6 +359,7 @@ function createAddedRow (content, length) {
     }
   }
 
+  // create cells
   let cells = cellsContent.map(text => {
     let cell = createEmptyCell()
     setAddedStyle(cell)
@@ -403,6 +367,7 @@ function createAddedRow (content, length) {
     return cell
   })
 
+  // append cells to the row
   let row = createEmptyRow()
   cells.forEach(cell => appendCellToRow(row, cell))
 
@@ -439,7 +404,6 @@ function setDiffStyles (ods) {
 
   styles['style:style'].push(addedLineStyle)
   styles['style:style'].push(removedLineStyle)
-  // console.dir({styles}, {depth: 5, colors: true})
 }
 
 function createCellStyleBgColor (styleName, color) {

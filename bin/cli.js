@@ -12,6 +12,7 @@ cli
 .option('-o, --f1 <path>', 'path of the original file to diff from')
 .option('-m, --f2, <path>', 'path of the modified file to diff to')
 .option('-O, --out [<path>]', 'destination path for the .ods diff output file')
+.option('-d, --csv-delimiter [<char>]', 'change the character delimiter for the CSV intermediate files', ';')
 .parse(process.argv)
 
 // if program was called with no arguments, show help.
@@ -25,4 +26,9 @@ if (!cli.f1 || !cli.f2) {
   process.exit(1)
 }
 
-odsdiff(cli.f1, cli.f2)
+let options = {
+  outputFilePath: cli.out,
+  csvDelimiter: cli.csvDelimiter
+}
+
+odsdiff(cli.f1, cli.f2, options)

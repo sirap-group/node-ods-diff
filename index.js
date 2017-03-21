@@ -16,17 +16,23 @@ const CELL_STYLE_ADDED_LINE_COLOR = '#00ff66'
 const CELL_STYLE_REMOVED_LINE = 'odsdiff_removedline'
 const CELL_STYLE_REMOVED_LINE_COLOR = '#ff9999'
 
-const CSV_DELIMITER = ';'
 const deleteOptions = { force: true }
 
 module.exports = odsDiff
 
-function odsDiff (baseFilePath, updatedFilePath) {
+function odsDiff (baseFilePath, updatedFilePath, {outputFilePath, csvDelimiter = ';'}) {
+  // configure the delimiter for csv intermediate files as a module global option
+  module.csvDelimiter = csvDelimiter
+
   const baseFilePathParsed = path.parse(baseFilePath)
   const updatedFilePathParsed = path.parse(updatedFilePath)
 
   const outputFileName = baseFilePathParsed.name.concat('__diff__', updatedFilePathParsed.name, baseFilePathParsed.ext)
-  const outputFilePath = path.join(baseFilePathParsed.dir, outputFileName)
+
+  // set default outputFilePath option if not passed in options
+  if (!outputFilePath) {
+    outputFilePath = path.join(baseFilePathParsed.dir, outputFileName)
+  }
 
   const baseExtractedDir = path.join(baseFilePathParsed.dir, baseFilePathParsed.name.concat('_files'))
   const updatedExtractedDir = path.join(updatedFilePathParsed.dir, updatedFilePathParsed.name.concat('_files'))
@@ -345,7 +351,7 @@ function createEmptyCell () {
 }
 
 function createAddedRow (content, length) {
-  let cellsContent = content.split(CSV_DELIMITER)
+  let cellsContent = content.split(module.csvDelimiter)
 
   // fix overly rows
   if (length !== undefined) {

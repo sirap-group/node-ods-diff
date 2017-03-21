@@ -87,6 +87,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
       let changes = sheetsChanges[getSheetName(sheet)]
       let rows = getSheetRows(sheet)
       let sheetCursor = 0
+      let columnCount = getSheetColumnCount(sheet)
       // let rowsToInsertAfter = []
 
       console.log(chalk.red('---'))
@@ -118,7 +119,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
         // added
         if (change.added) {
           let addindRowsContent = change.value.split('\n')
-          let addindRows = addindRowsContent.map(content => createAddedRow(content))
+          let addindRows = addindRowsContent.map(content => createAddedRow(content, columnCount))
           let cursorStart = sheetCursor
           let cursorEnd = sheetCursor + change.count
 
@@ -321,6 +322,11 @@ function getSheetName (sheet) {
   return sheet.$['table:name']
 }
 
+function getSheetColumnCount (sheet) {
+  // console.dir(sheet, {colors: true, depth: 3})
+  return sheet['table:table-column'][0].$['table:number-columns-repeated']
+}
+
 function getSheetRows (sheet) {
   return sheet['table:table-row']
 }
@@ -379,16 +385,39 @@ function createEmptyCell () {
   }
 }
 
-function createAddedRow (content) {
+function createAddedRow (content, length) {
   let cellsContent = content.split(CSV_DELIMITER)
+
+  // fix overly rows
+  if (length !== undefined) {
+    if (cellsContent.length > length) {
+      let overlyRowsCount = cellsContent.length - length
+      cellsContent.splice(cellsContent.length - length, overlyRowsCount)
+    }
+  }
+
   let cells = cellsContent.map(text => {
     let cell = createEmptyCell()
     setAddedStyle(cell)
     setCellText(cell, text)
     return cell
   })
+
   let row = createEmptyRow()
   cells.forEach(cell => appendCellToRow(row, cell))
+
+  // fix too short row length
+  if (length !== undefined) {
+    let rowLength = cells.length
+    if (rowLength < length) {
+      for (let i = 0; i < length - rowLength; i++) {
+        let cell = createEmptyCell()
+        setAddedStyle(cell)
+        appendCellToRow(row, cell)
+      }
+    }
+  }
+
   return row
 }
 

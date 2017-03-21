@@ -42,13 +42,13 @@ function odsDiff (baseFilePath, updatedFilePath, {outputFilePath, csvDelimiter =
   const updatedXmlFilePath = path.join(updatedExtractedDir, 'content.xml')
   const outputXmlFilePath = path.join(outputExtractedDir, 'content.xml')
 
-  console.log(chalk.blue('\n---'))
-  console.log(chalk.blue('ods-diff: Make a diff between two .ods files.'))
-  console.log(chalk.blue('MIT © Groupe SIRAP (https://github.com/sirap-group/node-ods-diff)'))
-  console.log('> Original file path: ' + path.resolve(baseFilePath))
-  console.log('> Modified file path: ' + path.resolve(updatedFilePath))
-  console.log('> output file path:    ' + path.resolve(outputFilePath))
-  console.log(chalk.blue('---\n'))
+  console.log(chalk.yellow('\n---'))
+  console.log(chalk.yellow('ods-diff: Make a diff between two .ods files.'))
+  console.log(chalk.yellow('MIT © Groupe SIRAP (https://github.com/sirap-group/node-ods-diff)'))
+  console.log('> ' + chalk.blue('Original file path') + ': ' + path.resolve(baseFilePath))
+  console.log('> ' + chalk.blue('Modified file path') + ': ' + path.resolve(updatedFilePath))
+  console.log('> ' + chalk.blue('output file path') + ':    ' + path.resolve(outputFilePath))
+  console.log(chalk.yellow('---\n'))
 
   // Clean dir and unzip ods files to handle their XML content
   Promise.all([

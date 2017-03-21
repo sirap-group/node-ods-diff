@@ -1,5 +1,7 @@
 node_modules
 coverage
 test/fixtures/*_files/
+test/fixtures/*/*_files/
 .~lock.*
 test/fixtures/sheet-origin__diff__sheet-modified.ods
+test/fixtures/*/sheet-origin__diff__sheet-modified.ods

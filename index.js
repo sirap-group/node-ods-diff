@@ -19,6 +19,8 @@ const CELL_STYLE_ADDED_LINE_COLOR = '#00ff66'
 const CELL_STYLE_REMOVED_LINE = 'odsdiff_removedline'
 const CELL_STYLE_REMOVED_LINE_COLOR = '#ff9999'
 
+const CSV_DELIMITER = ';'
+
 odsDiff(baseFilePath, updatedFilePath)
 
 module.exports = odsDiff
@@ -62,7 +64,7 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // prepare the source files directory output
   .then(() => {
-    console.log(chalk.blue('Create a working directory for the output source files, a copy of the origin ods extraction folder:'))
+    console.log(chalk.blue('\nCreate a working directory for the output source files, a copy of the origin ods extraction folder:'))
     console.log(chalk.blue('\\_ ').concat(baseExtractedDir, chalk.blue(' => '), outputExtractedDir))
     return new Promise((resolve, reject) => {
       copydir(baseExtractedDir, outputExtractedDir, (err) => {
@@ -79,15 +81,63 @@ function odsDiff (baseFilePath, updatedFilePath) {
   // compare the file's content
   .then(() => compareContentFiles(baseXmlFilePath, updatedXmlFilePath))
 
+  // apply the changes for each sheet
+  .then(({originOds, sheetsChanges}) => {
+    getDocumentSheets(originOds).forEach(sheet => {
+      let changes = sheetsChanges[getSheetName(sheet)]
+      let rows = getSheetRows(sheet)
+      let sheetCursor = 0
+      // let rowsToInsertAfter = []
+
+      console.log(chalk.red('---'))
+      console.dir({rows}, {colors: true, depth: 2})
+      console.dir({changes}, {colors: true, depth: 2})
+      console.log(chalk.red('---'))
+
+      changes.forEach(change => {
+        let row = rows[sheetCursor]
+        // console.dir({rows, sheetCursor, row, change}, {colors: true, depth: 3})
+
+        // no change
+        if (!change.added && !change.removed) {
+          sheetCursor += change.count
+          return
+        }
+
+        // removed
+        if (change.removed) {
+          let cells = getRowCells(row)
+          cells.forEach(cell => setRemovedStyle(cell))
+          sheetCursor += change.count
+        }
+
+        // added
+        if (change.added) {
+          // rowsToInsertAfter
+          let newRowsContent = change.value.split('\n')
+          let newRows = newRowsContent.map(content => createAddedRow(content))
+          console.dir({newRowsContent, newRows}, {colors: true, depth: 5})
+          newRows.forEach(_row => {
+            rows.splice(sheetCursor, 0, _row)
+            sheetCursor++
+          })
+        }
+      })
+    })
+
+    return originOds
+  })
+
   // Write the output XML
-  .then((updatedOds) => {
+  .then((originOds) => {
+    // console.dir({'originOds row': getDocumentSheets(originOds)}, {colors: true, depth: 5})
     let builder = new xml2js.Builder()
-    let xml = builder.buildObject(updatedOds)
+    let xml = builder.buildObject(originOds)
     return new Promise((resolve, reject) => {
       console.log(chalk.blue('\nWriting destination output: ') + outputXmlFilePath + '...')
       fs.writeFile(outputXmlFilePath, xml, 'utf8', (err) => {
         if (err) {
-          console.error(chalk.red("Can't write updatedOds XML in output destination file: " + outputXmlFilePath))
+          console.error(chalk.red("Can't write originOds XML in output destination file: " + outputXmlFilePath))
           reject(err)
           return
         }
@@ -154,14 +204,14 @@ function extractFile (input, output) {
 }
 
 function compareContentFiles (originPath, updatedPath) {
-  let originOdsSheets, updatedOdsSheets, updatedOds
+  let originOdsSheets, updatedOdsSheets, originOds
 
-  return parseFile(originPath).then((ods) => originOdsSheets = getDocumentSheets(ods))
-  .then(() => parseFile(updatedPath)).then((ods) => {
-    updatedOds = ods
-    updatedOdsSheets = getDocumentSheets(ods)
+  return parseFile(originPath).then(ods => {
+    originOds = ods
     setDiffStyles(ods)
+    originOdsSheets = getDocumentSheets(ods)
   })
+  .then(() => parseFile(updatedPath)).then(ods => updatedOdsSheets = getDocumentSheets(ods))
   .then(() => {
     if (originOdsSheets.length !== updatedOdsSheets.length) {
       throw new Error('ERROR: The two ods files has not the same number of sheets.')
@@ -188,39 +238,40 @@ function compareContentFiles (originPath, updatedPath) {
     console.log(chalk.blue('\nMake a diff of each CVS sheet...'))
     return Promise.all(
       originOdsSheets.map((sheet, sheetIndex) => {
-        return new Promise((resolve, reject) => {
-          let csv1 = ''
-          let csv2 = ''
-          let csv1Path = path.join(__dirname, getCSVPath(originPath, sheetIndex))
-          let csv2Path = path.join(__dirname, getCSVPath(updatedPath, sheetIndex))
-          return Promise.all([
-            new Promise((resolve, reject) => {
-              let rs = fs.createReadStream(csv1Path, 'utf8')
-              rs.on('data', d => csv1 += d)
-              rs.on('end', () => resolve())
-              rs.on('error', err => reject(err))
-            }),
-            new Promise((resolve, reject) => {
-              let rs = fs.createReadStream(csv2Path, 'utf8')
-              rs.on('data', d => csv2 += d)
-              rs.on('end', () => resolve())
-              rs.on('error', err => reject(err))
-            })
-          ])
-          .then(() => {
-            let changes = jsdiff.diffLines(csv1, csv2)
-            console.dir({csv1, csv2, changes}, {colors: true})
-            return {csv1, csv2, changes}
+        let csv1 = ''
+        let csv2 = ''
+        let csv1Path = path.join(__dirname, getCSVPath(originPath, sheetIndex))
+        let csv2Path = path.join(__dirname, getCSVPath(updatedPath, sheetIndex))
+        return Promise.all([
+          new Promise((resolve, reject) => {
+            let rs = fs.createReadStream(csv1Path, 'utf8')
+            rs.on('data', d => csv1 += d)
+            rs.on('end', () => resolve())
+            rs.on('error', err => reject(err))
+          }),
+          new Promise((resolve, reject) => {
+            let rs = fs.createReadStream(csv2Path, 'utf8')
+            rs.on('data', d => csv2 += d)
+            rs.on('end', () => resolve())
+            rs.on('error', err => reject(err))
           })
+        ])
+        .then(() => {
+          return {
+            changes: jsdiff.diffLines(csv1, csv2),
+            sheetName: getSheetName(sheet)
+          }
         })
       })
     )
-    .then(({csv1, csv2, changes}) => {
-
-    })
   })
 
-  .then(() => updatedOds)
+  // Resolve the originOds object to add diff changes, and the array of diff changes to apply to
+  .then((sheetsResults) => {
+    let sheetsChanges = []
+    sheetsResults.forEach(({changes, sheetName}) => sheetsChanges[sheetName] = changes)
+    return {originOds, sheetsChanges}
+  })
 }
 
 function getCSVPath (basePath, sheetIndex) {
@@ -247,6 +298,10 @@ function getDocumentSheets (ods) {
   let body = ods['office:document-content']['office:body'][0]
   let sheets = body['office:spreadsheet'][0]['table:table']
   return sheets
+}
+
+function getSheetName (sheet) {
+  return sheet.$['table:name']
 }
 
 function getSheetRows (sheet) {
@@ -288,6 +343,10 @@ function setRemovedStyleToRow (row) {
   })
 }
 
+function setCellText (cell, text) {
+  cell['text:p'] = text
+}
+
 function setAddedStyle (cell) {
   cell.$['table:style-name'] = CELL_STYLE_ADDED_LINE
 }
@@ -301,6 +360,30 @@ function createEmptyCell () {
     $: {},
     'text:p': [' ']
   }
+}
+
+function createAddedRow (content) {
+  let cellsContent = content.split(CSV_DELIMITER)
+  let cells = cellsContent.map(text => {
+    let cell = createEmptyCell()
+    setAddedStyle(cell)
+    setCellText(cell, text)
+    return cell
+  })
+  let row = createEmptyRow()
+  cells.forEach(cell => appendCellToRow(row, cell))
+  return row
+}
+
+function createEmptyRow () {
+  return {
+    $: {},
+    'table:table-cell': []
+  }
+}
+
+function appendCellToRow (row, cell) {
+  row['table:table-cell'].push(cell)
 }
 
 function setDiffStyles (ods) {

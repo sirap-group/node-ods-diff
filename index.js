@@ -95,9 +95,6 @@ function odsDiff (baseFilePath, updatedFilePath) {
       console.log(chalk.red('---'))
 
       changes.forEach(change => {
-        let row = rows[sheetCursor]
-        // console.dir({rows, sheetCursor, row, change}, {colors: true, depth: 3})
-
         // no change
         if (!change.added && !change.removed) {
           sheetCursor += change.count
@@ -106,21 +103,41 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
         // removed
         if (change.removed) {
-          let cells = getRowCells(row)
-          cells.forEach(cell => setRemovedStyle(cell))
+          let cursorStart = sheetCursor
+          let cursorEnd = sheetCursor + change.count
+          for (let cursor = cursorStart; cursor < cursorEnd; cursor++) {
+            let row = rows[cursor]
+            setRemovedStyleToRow(row)
+          }
+          // let cells = getRowCells(row)
+          // cells.forEach(cell => setRemovedStyle(cell))
           sheetCursor += change.count
+          return
         }
 
         // added
         if (change.added) {
-          // rowsToInsertAfter
-          let newRowsContent = change.value.split('\n')
-          let newRows = newRowsContent.map(content => createAddedRow(content))
-          console.dir({newRowsContent, newRows}, {colors: true, depth: 5})
-          newRows.forEach(_row => {
-            rows.splice(sheetCursor, 0, _row)
+          let addindRowsContent = change.value.split('\n')
+          let addindRows = addindRowsContent.map(content => createAddedRow(content))
+          let cursorStart = sheetCursor
+          let cursorEnd = sheetCursor + change.count
+
+          // fix the number of rows to insert
+          let overlyRowsCount = addindRows.length - change.count
+          console.dir({addindRowsContent, addindRows}, {colors: true, depth: 5})
+          console.log(chalk.red('>>> overlyRowsCount: ' + overlyRowsCount))
+          if (overlyRowsCount) {
+            addindRows.splice(addindRows.length - overlyRowsCount, overlyRowsCount)
+            addindRowsContent.splice(addindRowsContent.length - overlyRowsCount, overlyRowsCount)
+          }
+          console.dir({addindRowsContent, addindRows}, {colors: true, depth: 5})
+
+          addindRows.forEach(row => {
+            rows.splice(sheetCursor, 0, row)
             sheetCursor++
           })
+
+          return
         }
       })
     })

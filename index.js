@@ -10,9 +10,6 @@ const copydir = require('copy-dir')
 const archiver = require('archiver')
 const jsdiff = require('diff')
 
-const baseFilePath = './test/fixtures/sheet-origin.ods'
-const updatedFilePath = './test/fixtures/sheet-modified.ods'
-
 const CELL_STYLE_ADDED_LINE = 'odsdiff_addedline'
 const CELL_STYLE_ADDED_LINE_COLOR = '#00ff66'
 
@@ -20,8 +17,6 @@ const CELL_STYLE_REMOVED_LINE = 'odsdiff_removedline'
 const CELL_STYLE_REMOVED_LINE_COLOR = '#ff9999'
 
 const CSV_DELIMITER = ';'
-
-odsDiff(baseFilePath, updatedFilePath)
 
 module.exports = odsDiff
 

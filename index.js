@@ -8,6 +8,7 @@ const xml2js = require('xml2js')
 const chalk = require('chalk')
 const copydir = require('copy-dir')
 const archiver = require('archiver')
+const jsdiff = require('diff')
 
 const baseFilePath = './test/fixtures/sheet-origin.ods'
 const updatedFilePath = './test/fixtures/sheet-modified.ods'
@@ -61,14 +62,15 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // prepare the source files directory output
   .then(() => {
-    console.log(chalk.blue('Create a working directory for the output source files, a copy of the updated ods extraction folder:\n') + '  ' + outputExtractedDir)
+    console.log(chalk.blue('Create a working directory for the output source files, a copy of the origin ods extraction folder:'))
+    console.log(chalk.blue('\\_ ').concat(baseExtractedDir, chalk.blue(' => '), outputExtractedDir))
     return new Promise((resolve, reject) => {
-      copydir(updatedExtractedDir, outputExtractedDir, (err) => {
+      copydir(baseExtractedDir, outputExtractedDir, (err) => {
         if (err) {
           reject(err)
           return
         }
-        console.log('> ' + chalk.green('Output source folder created: ' + outputExtractedDir))
+        console.log('> ' + chalk.green('Output source folder created: ') + outputExtractedDir)
         resolve()
       })
     })
@@ -180,12 +182,54 @@ function compareContentFiles (originPath, updatedPath) {
     // updated csv
     convertOdsSheetsToCsvFiles(updatedOdsSheets, updatedPath)
   })
-  .thenResolve(updatedOds)
+
+  // make a diff of CVS files
+  .then(() => {
+    console.log(chalk.blue('\nMake a diff of each CVS sheet...'))
+    return Promise.all(
+      originOdsSheets.map((sheet, sheetIndex) => {
+        return new Promise((resolve, reject) => {
+          let csv1 = ''
+          let csv2 = ''
+          let csv1Path = path.join(__dirname, getCSVPath(originPath, sheetIndex))
+          let csv2Path = path.join(__dirname, getCSVPath(updatedPath, sheetIndex))
+          return Promise.all([
+            new Promise((resolve, reject) => {
+              let rs = fs.createReadStream(csv1Path, 'utf8')
+              rs.on('data', d => csv1 += d)
+              rs.on('end', () => resolve())
+              rs.on('error', err => reject(err))
+            }),
+            new Promise((resolve, reject) => {
+              let rs = fs.createReadStream(csv2Path, 'utf8')
+              rs.on('data', d => csv2 += d)
+              rs.on('end', () => resolve())
+              rs.on('error', err => reject(err))
+            })
+          ])
+          .then(() => {
+            let changes = jsdiff.diffLines(csv1, csv2)
+            console.dir({csv1, csv2, changes}, {colors: true})
+            return {csv1, csv2, changes}
+          })
+        })
+      })
+    )
+    .then(({csv1, csv2, changes}) => {
+
+    })
+  })
+
+  .then(() => updatedOds)
+}
+
+function getCSVPath (basePath, sheetIndex) {
+  return basePath.concat('_sheet#', sheetIndex, '.csv')
 }
 
 function convertOdsSheetsToCsvFiles (sheets, basePath) {
   sheets.forEach((sheet, sheetIndex) => {
-    let filePath = basePath.concat('_sheet#', sheetIndex, '.csv')
+    let filePath = getCSVPath(basePath, sheetIndex)
     let ws = fs.createWriteStream(filePath)
     console.log(chalk.blue('Writing CSV file: ') + filePath)
     getSheetRows(sheet).forEach((row) => {

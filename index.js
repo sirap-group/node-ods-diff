@@ -17,6 +17,7 @@ const CELL_STYLE_REMOVED_LINE = 'odsdiff_removedline'
 const CELL_STYLE_REMOVED_LINE_COLOR = '#ff9999'
 
 const CSV_DELIMITER = ';'
+const deleteOptions = { force: true }
 
 module.exports = odsDiff
 
@@ -45,10 +46,10 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // Clean dir and unzip ods files to handle their XML content
   Promise.all([
-    del.promise([baseExtractedDir])
+    del.promise([baseExtractedDir], deleteOptions)
     .then(() => extractFile(baseFilePath, baseExtractedDir)),
 
-    del.promise([updatedExtractedDir])
+    del.promise([updatedExtractedDir], deleteOptions)
     .then(() => extractFile(updatedFilePath, updatedExtractedDir))
   ])
 
@@ -169,9 +170,9 @@ function odsDiff (baseFilePath, updatedFilePath) {
 
   // clear the intermediate files
   .then(() => Promise.all([
-    del.promise([baseExtractedDir]),
-    del.promise([updatedExtractedDir]),
-    del.promise([outputExtractedDir])
+    del.promise([baseExtractedDir], deleteOptions),
+    del.promise([updatedExtractedDir], deleteOptions),
+    del.promise([outputExtractedDir], deleteOptions)
   ]))
 
   // Log script results

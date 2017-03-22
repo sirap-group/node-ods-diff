@@ -13,15 +13,15 @@
     - npm install
     - npm test
 
-"Test: node@latest":
+"Test: node@7":
   script:
     - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash
     - export NVM_DIR="$HOME/.nvm"
     - if [[ "$NVM_DIR/nvm.sh" ]]; then . "$NVM_DIR/nvm.sh"; fi
     - command -v nvm
     - nvm --version
-    - nvm install latest
-    - nvm use latest
+    - nvm install 7
+    - nvm use 7
     - nvm ls || echo "***"
     - node --version
     - npm --version

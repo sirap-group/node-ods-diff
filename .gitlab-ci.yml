@@ -7,7 +7,7 @@
     - nvm --version
     - nvm install lts/boron
     - nvm use lts/boron
-    - nvm ls
+    - nvm ls 2>&1
     - node --version
     - npm --version
     - npm install
@@ -22,7 +22,7 @@
     - nvm --version
     - nvm install latest
     - nvm use latest
-    - nvm ls
+    - nvm ls 2>&1
     - node --version
     - npm --version
     - npm install

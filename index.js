@@ -20,9 +20,11 @@ const deleteOptions = { force: true }
 
 module.exports = odsDiff
 
-function odsDiff (baseFilePath, updatedFilePath, {outputFilePath, csvDelimiter = ';'}) {
+function odsDiff (baseFilePath, updatedFilePath, {out, csvDelimiter = ';', verbose = false}) {
+  let outputFilePath = out
   // configure the delimiter for csv intermediate files as a module global option
   module.csvDelimiter = csvDelimiter
+  setVerboseMode(verbose)
 
   const baseFilePathParsed = path.parse(baseFilePath)
   const updatedFilePathParsed = path.parse(updatedFilePath)
@@ -438,4 +440,11 @@ function parseFile (filePath) {
       })
     })
   })
+}
+
+function setVerboseMode (enabled) {
+  if (!enabled) {
+    let noop = () => null
+    console.log = console.dir = noop
+  }
 }

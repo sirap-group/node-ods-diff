@@ -9,6 +9,7 @@ const odsdiff = require('../index')
 
 cli
 .version(pkg.version)
+.option('-v, --verbose', 'output all intermediate steps informations')
 .option('-o, --f1 <path>', 'path of the original file to diff from')
 .option('-m, --f2, <path>', 'path of the modified file to diff to')
 .option('-O, --out [<path>]', 'destination path for the .ods diff output file')
@@ -27,6 +28,7 @@ if (!cli.f1 || !cli.f2) {
 }
 
 let options = {
+  verbose: cli.verbose,
   outputFilePath: cli.out,
   csvDelimiter: cli.csvDelimiter
 }

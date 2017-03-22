@@ -14,28 +14,6 @@
 [![coverage report](http://gitlab.sirap.fr/open-source/node-ods-diff/badges/master/coverage.svg)](http://gitlab.sirap.fr/open-source/node-ods-diff/commits/master)
 
 
-> **Note:**
->
-> The repository name is `node-ods-diff` to show it is a node.js module
-```
-$ git clone https://github.com/sirap-group/node-ods-diff
-```
-> The package name is `ods-diff` because we are in node.js context
-```
-$ npm i -s ods-diff
-```
-```
-const odsDiff = require('ods-diff')
-```
-> The CLI command is `odsdiff`, because it is more standard as a *nix CLI tool and
-```
-$ npm i -g ods-diff
-```
-```
-$ odsdiff -v
-1.1.0
-```
-
 ## CLI
 
 ### Installation
@@ -77,6 +55,8 @@ Standard usage:
 $ odsdiff --f1 ./docs/v1/report.ods --f2 ./docs/v2/report.ods --out ./docs/report.diff.ods
 ```
 
+
+
 ## Node API
 
 ### Installation
@@ -107,7 +87,41 @@ odsDiff(reportv1Path, reportv2Path, odsDiffOptions)
 .catch(err => console.error(err))
 ```
 
-## Contribute
+
+## Note
+
+> Please note what name you must use depending what you are going to do with ods-diff
+
+The repository name is `node-ods-diff` to show it is a node.js module
+
+```sh
+$ git clone https://github.com/sirap-group/node-ods-diff
+```
+
+The package name is `ods-diff` because we are in node.js context
+
+```sh
+$ npm i -s ods-diff
+```
+
+```js
+const odsDiff = require('ods-diff')
+```
+
+The CLI command is `odsdiff`, because it is more standard as a *nix CLI tool and it is quicker to tape on keyboard.
+
+```sh
+$ npm i -g ods-diff
+```
+
+```sh
+$ odsdiff -v
+1.1.0
+```
+
+
+
+## Contributing
 
 ### Pull Requests are welcome !
 

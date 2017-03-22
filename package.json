@@ -8,6 +8,7 @@
   "bugs": {
     "url": "https://github.com/rbecheras/ods-diff/issues"
   },
+  "private": false,
   "license": "MIT",
   "files": [
     "index.js",

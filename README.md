@@ -1,8 +1,30 @@
-# ods-diff [![NPM version](https://badge.fury.io/js/ods-diff.svg)](https://npmjs.org/package/ods-diff) [![Build Status](https://travis-ci.org/sirap-group/node-ods-diff.svg?branch=master)](https://travis-ci.org/sirap-group/node-ods-diff)
+# node-ods-diff [![NPM version](https://badge.fury.io/js/ods-diff.svg)](https://npmjs.org/package/ods-diff) [![Build Status](https://travis-ci.org/sirap-group/node-ods-diff.svg?branch=master)](https://travis-ci.org/sirap-group/node-ods-diff)
 
-> Highlight the diff between two LibreOffice spreadsheets
+> Highlight the diff between two LibreOffice spreadsheets with the simple `node` and `CLI` interfaces of `ods-diff`.
 
 [![Standard - JavaScript Style Guide](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
+> **Warning**
+>
+> - The repository name is `node-ods-diff` to show it is a node.js module
+```sh
+$ git clone https://github.com/sirap-group/node-ods-diff
+```
+> - The package name is `ods-diff` because we are in node.js context
+```sh
+$ npm i -s odf-diff
+```
+```js
+const odsDiff = require('ods-diff')
+```
+> - The CLI command is `odsdiff`, because it is more standard as a *nix CLI tool and
+```sh
+$ npm i -g odf-diff
+```
+```sh
+$ odsdiff -v
+1.1.0
+```
 
 ## CLI
 
@@ -17,16 +39,16 @@ $ npm install --global ods-diff
 Output version
 
 ```sh
-$ ods-diff -V
+$ odsdiff -V
 0.1.0
 ```
 
 Output usage help
 
 ```sh
-$ ods-diff -h
+$ odsdiff -h
 
-  Usage: ods-diff [options]
+  Usage: odsdiff [options]
 
   Options:
 
@@ -42,7 +64,7 @@ $ ods-diff -h
 Standard usage:
 
 ```sh
-$ ods-diff --f1 ./docs/v1/report.ods --f2 ./docs/v2/report.ods --out ./docs/report.diff.ods
+$ odsdiff --f1 ./docs/v1/report.ods --f2 ./docs/v2/report.ods --out ./docs/report.diff.ods
 ```
 
 ## Node API

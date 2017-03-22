@@ -19,8 +19,10 @@
   },
   "bin": "bin/cli.js",
   "scripts": {
-    "test": "bash test/test.sh",
-    "demo": "node bin/cli.js --f1 ./test/fixtures/simple/sheet-origin.ods --f2 ./test/fixtures/simple/sheet-modified.ods"
+    "demo-cli": "node bin/cli.js --verbose --f1 ./test/fixtures/simple/sheet-origin.ods --f2 ./test/fixtures/simple/sheet-modified.ods",
+    "demo": "npm run demo-cli",
+    "test": "bash test/cli.sh",
+    "test-cli": "npm test"
   },
   "keywords": [
     "diff",

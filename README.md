@@ -1,4 +1,4 @@
-# node-ods-diff
+# node-ods-diff [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/sirap-group/node-ods-diff/master/LICENSE) [![GitHub tag](https://img.shields.io/github/tag/sirap-group/node-ods-diff.svg?maxAge=2592000?style=plastic)](git@github.com:sirap-group/node-ods-diff.git)
 
 > Highlight the diff between two LibreOffice spreadsheets with the simple `node` and `CLI` interfaces of `ods-diff`
 

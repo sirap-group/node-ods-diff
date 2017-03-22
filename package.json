@@ -19,7 +19,9 @@
   "engines": {
     "node": ">=4"
   },
-  "bin": "./bin/cli.js",
+  "bin": {
+    "odsdiff": "./bin/cli.js"
+  },
   "scripts": {
     "demo-cli": "node bin/cli.js --verbose --f1 ./test/fixtures/simple/sheet-origin.ods --f2 ./test/fixtures/simple/sheet-modified.ods",
     "demo": "npm run demo-cli",

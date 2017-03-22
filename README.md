@@ -1,30 +1,17 @@
-<h1 style="text-align:center">
-  node-ods-diff<br>
-  <small> Highlight the diff between two LibreOffice spreadsheets with the simple `node` and `CLI` interfaces of `ods-diff`.</small>
-</h1>
-<p style="text-align:center">
+# node-ods-diff
 
+> Highlight the diff between two LibreOffice spreadsheets with the simple `node` and `CLI` interfaces of `ods-diff`
 
 [![NPM version](https://badge.fury.io/js/ods-diff.svg)](https://npmjs.org/package/ods-diff)
-
-<br>
-[![Build Status](https://travis-ci.org/sirap-group/node-ods-diff.svg?branch=master)](https://travis-ci.org/sirap-group/node-ods-diff)
-
-[![Coverage Status](https://coveralls.io/repos/github/sirap-group/node-ods-diff/badge.svg?branch=master)](https://coveralls.io/github/sirap-group/node-ods-diff?branch=master)
-
-<br>
-[![build status](http://gitlab.sirap.fr/open-source/node-ods-diff/badges/master/build.svg)](http://gitlab.sirap.fr/open-source/node-ods-diff/commits/master)
-
-[![coverage report](http://gitlab.sirap.fr/open-source/node-ods-diff/badges/master/coverage.svg)](http://gitlab.sirap.fr/open-source/node-ods-diff/commits/master)
-
-
-<br>
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Semver 2.0](https://img.shields.io/badge/Versioning-Semver%202.0-brightgreen.svg)](http://semver.org/)
 
+[![Build Status](https://travis-ci.org/sirap-group/node-ods-diff.svg?branch=master)](https://travis-ci.org/sirap-group/node-ods-diff)
+[![Coverage Status](https://coveralls.io/repos/github/sirap-group/node-ods-diff/badge.svg?branch=master)](https://coveralls.io/github/sirap-group/node-ods-diff?branch=master)
 
-</p>
 
+[![build status](http://gitlab.sirap.fr/open-source/node-ods-diff/badges/master/build.svg)](http://gitlab.sirap.fr/open-source/node-ods-diff/commits/master)
+[![coverage report](http://gitlab.sirap.fr/open-source/node-ods-diff/badges/master/coverage.svg)](http://gitlab.sirap.fr/open-source/node-ods-diff/commits/master)
 
 
 > **Note:**

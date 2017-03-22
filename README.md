@@ -1,4 +1,4 @@
-# ods-diff [![NPM version](https://badge.fury.io/js/ods-diff.svg)](https://npmjs.org/package/ods-diff) [![Build Status](https://travis-ci.org/rbecheras/ods-diff.svg?branch=master)](https://travis-ci.org/rbecheras/ods-diff)
+# ods-diff [![NPM version](https://badge.fury.io/js/ods-diff.svg)](https://npmjs.org/package/ods-diff) [![Build Status](https://travis-ci.org/sirap-group/node-ods-diff.svg?branch=master)](https://travis-ci.org/sirap-group/node-ods-diff)
 
 > Highlight the diff between two LibreOffice spreadsheets
 

@@ -1,7 +1,7 @@
 {
   "name": "ods-diff",
   "description": "Highlight the diff between two LibreOffice spreadsheet",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "homepage": "https://github.com/sirap-group/node-ods-diff",
   "author": "Rémi Becheras (https://github.com/rbecheras)",
   "repository": "sirap-group/ods-diff",

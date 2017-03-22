@@ -16,22 +16,22 @@
 
 > **Note:**
 >
-> - The repository name is `node-ods-diff` to show it is a node.js module
-```sh
+> The repository name is `node-ods-diff` to show it is a node.js module
+```
 $ git clone https://github.com/sirap-group/node-ods-diff
 ```
-> - The package name is `ods-diff` because we are in node.js context
-```sh
+> The package name is `ods-diff` because we are in node.js context
+```
 $ npm i -s ods-diff
 ```
-```js
+```
 const odsDiff = require('ods-diff')
 ```
-> - The CLI command is `odsdiff`, because it is more standard as a *nix CLI tool and
-```sh
+> The CLI command is `odsdiff`, because it is more standard as a *nix CLI tool and
+```
 $ npm i -g ods-diff
 ```
-```sh
+```
 $ odsdiff -v
 1.1.0
 ```

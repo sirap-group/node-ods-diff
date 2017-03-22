@@ -53,7 +53,7 @@ function odsDiff (baseFilePath, updatedFilePath, {out, csvDelimiter = ';', verbo
   console.log(chalk.yellow('---\n'))
 
   // Clean dir and unzip ods files to handle their XML content
-  Promise.all([
+  return Promise.all([
     del.promise([baseExtractedDir], deleteOptions)
     .then(() => extractFile(baseFilePath, baseExtractedDir)),
 
